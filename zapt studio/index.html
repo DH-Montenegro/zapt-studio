@@ -696,7 +696,96 @@
       });
     });
 
-  
+    // ===== Pré-visualização de segmento (sólida) =====
+    function ensurePreviewSegment(){
+      if(!previewSegment && anchors.length){
+        const a=anchors[anchors.length-1];
+        previewSegment = new fabric.Line([a.x,a.y,a.x,a.y], {
+          stroke:'#2563EB',
+          strokeWidth:2,
+          selectable:false,
+          evented:false
+        });
+        canvas.add(previewSegment); canvas.bringToFront(previewSegment);
+      }
+      ensureEdgeCursorDot();
+    }
+    function ensureEdgeCursorDot(){
+      if(!edgeCursorDot){
+        edgeCursorDot = new fabric.Circle({
+          radius:4, fill:'#208BEC', stroke:'#ffffff', strokeWidth:1.5,
+          originX:'center', originY:'center', selectable:false, evented:false, opacity:0.9
+        });
+        canvas.add(edgeCursorDot);
+      }
+    }
+    function updateEdgeCursorDot(p){
+      if(edgeCursorDot){
+        edgeCursorDot.set({ left:p.x, top:p.y });
+        edgeCursorDot.setCoords();
+      }
+    }
+    function updatePreviewSegment(p){
+      if(!previewSegment) return;
+      const a=anchors[anchors.length-1];
+      previewSegment.set({ x1:a.x, y1:a.y, x2:p.x, y2:p.y });
+
+      const nearClose = anchors.length >= 3 && dist(p, anchors[0]) <= CLOSE_RADIUS;
+      previewSegment.set('stroke', nearClose ? '#10B981' : '#2563EB');
+      if(edgeCursorDot) edgeCursorDot.set('fill', nearClose ? '#10B981' : '#208BEC');
+
+      previewSegment.dirty=true; previewSegment.setCoords();
+      updateEdgeCursorDot(p);
+    }
+
+    // ===== Prévia da curva =====
+    function ensureCurvePreview(){ if(!curvePreview){ curvePreview = new fabric.Polyline([], { stroke:'#208BEC', strokeWidth:1.2, fill:'', selectable:false, evented:false }); canvas.add(curvePreview); } }
+    function updateCurvePreviewForCurrentDrag(){
+      if(anchors.length<2) return;
+      const a1 = anchors[anchors.length-1];
+      const a0 = anchors[anchors.length-2];
+      const c1 = a0.hOut ? a0.hOut : {x:a0.x,y:a0.y};
+      const c2 = a1.hIn ? a1.hIn : {x:a1.x,y:a1.y};
+      const L = dist(a0,a1) + dist(a0,c1)*0.5 + dist(a1,c2)*0.5;
+      const steps = Math.max(8, Math.min(64, Math.round(L/12)));
+      const pts=[];
+      for(let s=0;s<=steps;s++){
+        const t=s/steps;
+        pts.push(cubicPoint(a0,c1,c2,a1,t));
+      }
+      ensureCurvePreview();
+      curvePreview.set({points:pts}); curvePreview.dirty=true; curvePreview.setCoords();
+      canvas.requestRenderAll();
+    }
+
+    // ===== NOVO: preenchimento vivo do polígono =====
+    function ensureLiveFill(){
+      if(!liveFill){
+        liveFill = new fabric.Polygon([], {
+          fill:'rgba(32,139,236,0.08)',
+          stroke:'#208BEC',
+          strokeWidth:1,
+          selectable:false,
+          evented:false
+        });
+        canvas.add(liveFill);
+        // garantir que marcadores e label fiquem por cima
+        canvas.bringToFront(previewSegment || liveFill);
+      }
+    }
+    function updateLiveFill(pointer){
+      if(anchors.length<1) return;
+      ensureLiveFill();
+      // pontos já amostrados dos segmentos + ponteiro atual como última vértice
+      const basePts = buildPolygonPointsFromAnchors(false);
+      const pts = basePts.concat([{x:pointer.x, y:pointer.y}]);
+      liveFill.set({ points: pts });
+      liveFill.dirty=true; liveFill.setCoords();
+      // z-order: fill atrás do preview/label
+      if(previewSegment) canvas.bringToFront(previewSegment);
+      if(curvePreview) canvas.bringToFront(curvePreview);
+      if(edgeLabel) canvas.bringToFront(edgeLabel);
+    }
 
     // ===== NOVO: label de comprimento/ângulo do segmento corrente =====
     function ensureEdgeLabel(){
@@ -1356,4 +1445,3 @@
 
 </body>
 </html>
-
