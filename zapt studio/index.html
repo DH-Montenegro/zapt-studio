@@ -22,9 +22,9 @@
       --bg:#FFFFFF;
       --surface:#FFFFFF;
       --canvas-bg:#F5F7FB;
-      --text:#0F172A;       /* Slate-900 */
-      --muted:#64748B;      /* Slate-500 */
-      --muted-2:#94A3B8;    /* Slate-400 */
+      --text:#0F172A;
+      --muted:#64748B;
+      --muted-2:#94A3B8;
       --border:#E6EAF0;
       --ring: rgba(32,139,236,.35);
       --shadow-sm:0 1px 2px rgba(16,24,40,.08);
@@ -57,7 +57,6 @@
       grid-template-rows: var(--topbar-h) 1fr;
     }
 
-    /* Topbar */
     .topbar{
       grid-column:1/-1; grid-row:1;
       display:flex; align-items:center; gap:12px;
@@ -78,7 +77,6 @@
 
     .spacer{flex:1}
 
-    /* Botões */
     .topbar-actions{display:flex;gap:8px;margin-left:auto}
     .btn-mini{
       appearance:none; border:1px solid var(--border); background:#fff;
@@ -90,7 +88,6 @@
     .btn-primary:hover{filter:brightness(.96)}
     .chk{accent-color:var(--brand)}
 
-    /* Sidebar */
     aside.sidebar{
       grid-column:1; grid-row:2;
       background:var(--bg); border-right:1px solid var(--border);
@@ -115,7 +112,6 @@
     .bg-file{display:flex;align-items:center;gap:8px}
     .muted{color:var(--muted)}
 
-    /* Camadas */
     .layers{display:flex;flex-direction:column;gap:8px;max-height:45vh;overflow:auto}
     .layer-item{
       display:grid; grid-template-columns:auto 1fr auto; align-items:center;
@@ -136,7 +132,6 @@
     .layer-item.drop-above{box-shadow:0 -2px 0 var(--brand) inset}
     .layer-item.drop-below{box-shadow:0  2px 0 var(--brand) inset}
 
-    /* Stage / Canvas */
     .stage{
       grid-column:2; grid-row:2; position:relative; background:var(--canvas-bg);
       display:flex; align-items:center; justify-content:center; padding:16px; overflow:hidden; min-width:0; min-height:0;
@@ -147,7 +142,6 @@
     }
     canvas{display:block}
 
-    /* Barra flutuante (inferior, centralizada) */
     .floatbar{
       position:fixed; z-index:20; background:#fff;
       border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-md);
@@ -159,7 +153,6 @@
     }
     .fbtn:hover{background:#F6FAFF; border-color:#CFE6FF}
 
-    /* Pop-up de propriedades (fixo à direita) */
     .poly-menu{
       position:absolute; z-index:30; min-width:270px; background:#fff;
       border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-lg);
@@ -192,13 +185,11 @@
       padding:10px 12px; border-radius:12px; opacity:.95; font-size:13px; display:none; z-index:50; box-shadow:var(--shadow-md);
     }
 
-    /* Textos mais claros */
     .help-inline{font-size:12px; color:var(--muted-2)}
   </style>
 </head>
 <body>
   <div class="app">
-    <!-- Topbar -->
     <div class="topbar">
       <div class="logo-wrap">
         <label for="logoInput" class="logo-tap" title="Carregar logo">
@@ -215,7 +206,6 @@
       </div>
     </div>
 
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="section">
         <h4>Planta (Imagem)</h4>
@@ -251,27 +241,28 @@
       </div>
     </aside>
 
-    <!-- Stage -->
     <main class="stage">
       <div id="canvasShell" class="canvas-shell">
         <canvas id="c"></canvas>
 
-        <!-- Menu Propriedades -->
+        <!-- ======= MENU DE PROPRIEDADES (ORDEM AJUSTADA) ======= -->
         <div id="polyMenu" class="poly-menu">
           <h5>Propriedades do item</h5>
-          <div class="field"><label style="margin-right:8px">Nome</label><input id="nameInput" type="text" placeholder="Ex.: Praça de Alimentação"/></div>
-          <div class="field"><label>Borda</label><input id="strokePicker" type="color" value="#D1D1D1"/></div>
-          <div class="field"><label>Espessura</label><input id="strokeWidthInput" type="number" min="0" step="0.5" value="1" style="width:80px"/></div>
-          <div class="field"><label>Preenchimento</label><input id="fillPicker" type="color" value="#EAEFF2"/></div>
-          <div class="field">
-            <select id="typeSelect" class="select" title="Tipo de camada">
-              <option value="poi">Ponto de interesse</option>
+          <div class="field"><label style="margin-right:8px">Nome do item</label><input id="nameInput" type="text" placeholder="Ex.: Loja 101"/></div>
+          <div class="field" style="gap:12px">
+            <label style="margin-right:8px">Categoria</label>
+            <select id="typeSelect" class="select" title="Categoria do item">
+              <option value="loja">Loja</option>
+              <option value="ancora">Loja âncora</option>
+              <option value="alimentacao">Alimentação</option>
               <option value="andar">Andar abaixo</option>
+              <option value="contorno">Contorno da planta</option>
             </select>
           </div>
-          <div class="field">
-            <button id="btnEditCurves" class="btn-mini" title="Editar curvas"><span class="material-symbols-outlined">edit</span>Editar curvas</button>
-          </div>
+          <div class="field"><label>Preenchimento</label><input id="fillPicker" type="color" value="#EAEFF2"/></div>
+          <div class="field"><label>Borda</label><input id="strokePicker" type="color" value="#D1D1D1"/></div>
+          <div class="field"><label>Espessura</label><input id="strokeWidthInput" type="number" min="0" step="0.5" value="0.5" style="width:80px"/></div>
+          <!-- Botão 'Editar curvas' removido conforme solicitado -->
         </div>
 
         <button id="trashFab" class="trash-fab" title="Excluir">
@@ -281,21 +272,45 @@
     </main>
   </div>
 
-  <!-- Toolbar inferior -->
   <div id="floatbar" class="floatbar">
-    <button id="btnStartPoly" class="fbtn">
-      <span class="material-symbols-outlined">polyline</span>
+    <button id="btnStartPoly" class="fbtn" title="Desenhar polígono">
+      <!-- Ícone Fountain Pen -->
+      <svg width="20" height="20" viewBox="0 0 298.727 298.727" aria-hidden="true" style="display:block">
+        <path fill="currentColor" d="M286.069,12.66c-16.881-16.879-44.344-16.88-61.221,0C100.195,137.307,158.153,74.583,47.446,205.654L3.794,233.971
+          c-2.372,1.538-3.801,4.176-3.794,7.004l0.117,49.306c0,0.003,0,0.007,0,0.009v0.014c0.014,4.606,3.761,8.296,8.305,8.305
+          l49.331,0.118c0.007,0,0.013,0,0.02,0c2.819,0,5.449-1.427,6.984-3.794l28.314-43.649
+          c130.17-109.947,67.474-51.879,192.998-177.405C302.947,57.002,302.947,29.539,286.069,12.66z
+          M53.258,282.067l-24.764-0.059L49.402,261.1c3.251-3.251,3.251-8.523,0-11.773c-3.251-3.251-8.521-3.252-11.774,0
+          L16.72,270.234l-0.059-24.764l35.226-22.85l24.22,24.221L53.258,282.067z
+          M87.234,234.42l-22.927-22.927l74.564-88.279l36.641,36.641L87.234,234.42z
+          M187.804,148.598l-37.675-37.674l68.491-68.491l37.674,37.674L187.804,148.598z
+          M274.294,62.107l-6.226,6.227L230.394,30.66l6.227-6.226c10.411-10.411,27.263-10.414,37.673,0
+          C284.682,34.82,284.682,51.721,274.294,62.107z"/>
+      </svg>
       Desenhar polígono
     </button>
-    <button id="btnFinishPoly" class="fbtn">
-      <span class="material-symbols-outlined">done</span>
-      Concluir
-    </button>
+
+    <div class="fbtn" id="btnShapes" style="position:relative;">
+      <span class="material-symbols-outlined">category</span> Formas
+      <div id="shapesDropdown" style="
+        display:none; position:absolute; bottom:100%; left:0;
+        background:#fff; border:1px solid var(--border);
+        border-radius:12px; box-shadow:var(--shadow-md);
+        padding:6px; flex-direction:column; gap:4px;
+      ">
+        <button class="fbtn" data-shape="square">Quadrado</button>
+        <button class="fbtn" data-shape="rect">Retângulo</button>
+        <button class="fbtn" data-shape="circle">Círculo</button>
+      </div>
+    </div>
+
     <button id="btnUndo" class="fbtn" title="Desfazer">
       <span class="material-symbols-outlined">undo</span>
+      Desfazer
     </button>
     <button id="btnRedo" class="fbtn" title="Refazer">
       <span class="material-symbols-outlined">redo</span>
+      Refazer
     </button>
   </div>
 
@@ -308,7 +323,6 @@
     const shell = document.getElementById('canvasShell');
     const floatbar = document.getElementById('floatbar');
 
-    /* ========= Responsividade ========= */
     function resizeCanvasToShell(){
       const w = shell.clientWidth, h = shell.clientHeight;
       if(w && h){
@@ -322,7 +336,6 @@
     window.addEventListener('resize', resizeCanvasToShell);
     requestAnimationFrame(resizeCanvasToShell);
 
-    /* ========= Centrar barra flutuante ========= */
     function positionFloatbar(){
       const r = shell.getBoundingClientRect();
       const fb = floatbar.getBoundingClientRect();
@@ -330,7 +343,6 @@
       floatbar.style.top  = (r.bottom - 16 - fb.height) + 'px';
     }
 
-    /* ========= Zoom / Pan ========= */
     let isCanvasHovered=false;
     canvas.upperCanvasEl.addEventListener('mouseenter', ()=>{ isCanvasHovered=true; });
     canvas.upperCanvasEl.addEventListener('mouseleave', ()=>{
@@ -378,10 +390,8 @@
     });
     canvas.on('mouse:up',()=>{ if(isPanning){ isPanning=false; canvas.setCursor('grab'); } if(mode==='drawing') handleDrawingMouseUp(); });
 
-    /* ========= Estados ========= */
-    let mode='idle'; // 'idle' | 'drawing' | 'editing'
+    let mode='idle';
 
-    /* ========= Histórico ========= */
     const HISTORY_LIMIT=50; const history={stack:[],index:-1}; let suppressHistory=false;
     function addHistory(){
       if(suppressHistory) return;
@@ -403,7 +413,6 @@
     function undo(){ if(mode==='drawing'){ undoPoint(); return; } if(history.index>0){ history.index--; loadFromHistory(history.index);} }
     function redo(){ if(history.index < history.stack.length-1){ history.index++; loadFromHistory(history.index);} }
 
-    /* ========= Camadas ========= */
     const UID_PREFIX='obj_'; let UID_SEQ=0;
     function genUid(){ return UID_PREFIX+(++UID_SEQ)+'_'+Date.now().toString(36); }
     function ensureUid(o){ if(!o.meta) o.meta={}; if(!o.meta.uid) o.meta.uid = genUid(); }
@@ -473,7 +482,6 @@
       hideFloatingUI(); addHistory(); refreshLayers(); canvas.requestRenderAll();
     }
 
-    /* ========= Utils ========= */
     function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); }
     function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy); }
     function toRGBA(hex, a){ const h=hex.replace('#',''); const n=parseInt(h,16); const r=(n>>16)&255, g=(n>>8)&255, b=n&255; return `rgba(${r},${g},${b},${a})`; }
@@ -490,26 +498,32 @@
     }
     function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
 
-    /* ========= “Pen tool” com curvas Bézier ========= */
     const CLOSE_RADIUS=8;
 
-    let anchors=[]; // [{x,y,hIn?,hOut?}]
+    let anchors=[];
     let drawing=false, isPlacing=false, placingDragged=false, dragStart=null;
 
-    let committedPath=null;   // esqueleto
-    let previewSegment=null;  // linha temporária reforçada
-    let curvePreview=null;    // prévia da curva do segmento atual
-    let edgeCursorDot=null;   // ponto no cursor
-    let pointMarkers=[];      // círculos das âncoras
-    let handleLines=[];       // linhas das alças
-    let handleDots=[];        // pontos das alças
-    let currentMarker=null;   // mira do cursor
+    // ===== NOVOS ITENS DE UX =====
+    let committedPath=null;      // traço sólido do caminho já colocado
+    let liveFill=null;           // preenchimento vivo do polígono em construção
+    let previewSegment=null;     // segmento do último ponto até o cursor
+    let curvePreview=null;       // prévia da curva (quando arrasta)
+    let edgeCursorDot=null;      // bolinha no cursor
+    let pointMarkers=[];
+    let handleLines=[];
+    let handleDots=[];
+    let currentMarker=null;
+    let edgeLabel=null;          // label com comprimento/ângulo
+    let firstNodeHalo=null;      // halo do 1º ponto ao aproximar para fechar
 
     function clearPreviewGraphics(){
       if(committedPath){ canvas.remove(committedPath); committedPath=null; }
+      if(liveFill){ canvas.remove(liveFill); liveFill=null; }
       if(previewSegment){ canvas.remove(previewSegment); previewSegment=null; }
       if(curvePreview){ canvas.remove(curvePreview); curvePreview=null; }
       if(edgeCursorDot){ canvas.remove(edgeCursorDot); edgeCursorDot=null; }
+      if(edgeLabel){ canvas.remove(edgeLabel); edgeLabel=null; }
+      if(firstNodeHalo){ canvas.remove(firstNodeHalo); firstNodeHalo=null; }
       pointMarkers.forEach(o=>canvas.remove(o)); pointMarkers=[];
       handleLines.forEach(o=>canvas.remove(o)); handleLines=[];
       handleDots.forEach(o=>canvas.remove(o)); handleDots=[];
@@ -520,7 +534,7 @@
       if(mode!=='idle') return;
       mode='drawing'; drawing=true; anchors=[]; clearPreviewGraphics();
       canvas.discardActiveObject(); canvas.selection=false; canvas.skipTargetFind=true; canvas.defaultCursor='crosshair';
-      toast('Clique = ponto/linha | Clique+arraste = curva. SHIFT alinha. Enter fecha.');
+      toast('Pen ativa — Clique: ponto | Clique+arraste: curva | Shift: 45° | Backspace: desfaz | Enter: fechar.');
     }
     function finishDrawing(){
       if(mode!=='drawing') return;
@@ -528,7 +542,7 @@
       const pts = buildPolygonPointsFromAnchors(true);
       const aCopy = deepClone(anchors);
       clearPreviewGraphics();
-      const obj = createPolygonFromPoints(pts, 'poi', undefined, aCopy);
+      const obj = createPolygonFromPoints(pts, 'loja', undefined, aCopy); // padrão: loja
       canvas.setActiveObject(obj); canvas.requestRenderAll();
       mode='idle'; drawing=false; anchors=[]; addHistory(); refreshLayers(); updateFloatingUI();
       canvas.selection=true; canvas.skipTargetFind=false; canvas.defaultCursor='default';
@@ -543,14 +557,18 @@
       return a;
     }
     function addMarker(p, isFirst=false){
-      const r=isFirst?4:3;
-      const marker=new fabric.Circle({
-        left:p.x, top:p.y, originX:'center', originY:'center', radius:r,
-        fill:toRGBA('#208BEC',isFirst?.20:.14), stroke:'#208BEC', strokeWidth:isFirst?1.5:1,
-        selectable:false, evented:false
+      return new fabric.Circle({
+        left: p.x, top: p.y,
+        originX: 'center', originY: 'center',
+        radius: isFirst ? 6 : 4,
+        fill: isFirst ? '#10B981' : '#ffffff',
+        stroke: isFirst ? '#059669' : '#2563EB',
+        strokeWidth: 2,
+        selectable: false,
+        evented: false
       });
-      canvas.add(marker); canvas.bringToFront(marker); return marker;
     }
+
     function ensureCurrentMarker(){
       if(!currentMarker){
         currentMarker = new fabric.Circle({
@@ -562,10 +580,15 @@
     }
     function updateCurrentMarker(p){ if(currentMarker){ currentMarker.set({ left:p.x, top:p.y }); currentMarker.setCoords(); } }
 
+    // ====== NOVO: caminho comprometido sem pontilhado ======
     function updateCommittedSkeleton(){
       const points = anchors.map(a=>({x:a.x,y:a.y}));
       if(!committedPath){
-        committedPath = new fabric.Polyline(points, { stroke:'#CBD5E1', strokeDashArray:[2,2], strokeWidth:1, fill:'', selectable:false, evented:false });
+        committedPath = new fabric.Polyline(points, {
+          stroke:'#94A3B8', /* cor suave e sólida */
+          strokeWidth:1.2,
+          fill:'', selectable:false, evented:false
+        });
         canvas.add(committedPath);
       } else {
         committedPath.set({ points });
@@ -615,66 +638,115 @@
       return pts;
     }
 
-    /* ===== PRÉ-VISUALIZAÇÃO DA ARESTA ===== */
-    function ensurePreviewSegment(){
-      if(!previewSegment && anchors.length){
-        const a=anchors[anchors.length-1];
-        previewSegment = new fabric.Line([a.x,a.y,a.x,a.y], {
-          stroke:'#208BEC',
-          strokeWidth:2.5,
-          strokeDashArray:[6,6],
-          opacity:0.9,
-          selectable:false, evented:false
+    // Dropdown de formas (inalterado)
+    const btnShapes = document.getElementById('btnShapes');
+    const dropdown = document.getElementById('shapesDropdown');
+    btnShapes.addEventListener('click', () => {
+      dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    dropdown.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const shape = btn.dataset.shape;
+        let obj;
+        const size = 100;
+        const common = {
+          fill: '#EAEFF2', // loja
+          stroke: '#D1D1D1',
+          strokeWidth: 0.5,
+          opacity: 0.95,
+          shadow: new fabric.Shadow({ color:'rgba(0,0,0,0.25)', blur:12, offsetX:6, offsetY:6, nonScaling:true }),
+          zaptKind: 'polygon',
+          meta: { type: 'loja', name: '' }
+        };
+        if(shape === 'square'){
+          obj = new fabric.Rect({
+            left: canvas.width/2 - size/2,
+            top: canvas.height/2 - size/2,
+            width: size,
+            height: size,
+            ...common
+          });
+        }
+        else if(shape === 'rect'){
+          obj = new fabric.Rect({
+            left: canvas.width/2 - size,
+            top: canvas.height/2 - size/2,
+            width: size*2,
+            height: size,
+            ...common
+          });
+        }
+        else if(shape === 'circle'){
+          obj = new fabric.Circle({
+            left: canvas.width/2 - size/2,
+            top: canvas.height/2 - size/2,
+            radius: size/2,
+            ...common
+          });
+        }
+        if(obj){
+          canvas.add(obj);
+          canvas.setActiveObject(obj);
+          addHistory();
+          refreshLayers();
+          updateFloatingUI();
+        }
+        dropdown.style.display = 'none';
+      });
+    });
+
+  
+
+    // ===== NOVO: label de comprimento/ângulo do segmento corrente =====
+    function ensureEdgeLabel(){
+      if(!edgeLabel){
+        edgeLabel = new fabric.Text('', {
+          fontSize: 11,
+          fontFamily: 'Inter, system-ui, sans-serif',
+          fill:'#ffffff',
+          backgroundColor:'rgba(11,18,32,0.9)',
+          padding:4,
+          originX:'left',
+          originY:'top',
+          selectable:false,
+          evented:false
         });
-        canvas.add(previewSegment); canvas.bringToFront(previewSegment);
+        canvas.add(edgeLabel);
       }
-      ensureEdgeCursorDot();
     }
-    function ensureEdgeCursorDot(){
-      if(!edgeCursorDot){
-        edgeCursorDot = new fabric.Circle({
-          radius:4, fill:'#208BEC', stroke:'#ffffff', strokeWidth:1.5,
-          originX:'center', originY:'center', selectable:false, evented:false, opacity:0.9
+    function updateEdgeLabel(p){
+      if(anchors.length<1) return;
+      ensureEdgeLabel();
+      const a = anchors[anchors.length-1];
+      const dx = p.x - a.x, dy = p.y - a.y;
+      const len = Math.hypot(dx, dy);
+      let ang = Math.atan2(dy, dx) * 180/Math.PI;
+      if(ang < 0) ang += 360;
+      edgeLabel.set({ text: `${len.toFixed(0)} px  •  ${ang.toFixed(0)}°`, left: p.x + 10, top: p.y + 10 });
+      edgeLabel.setCoords();
+      canvas.bringToFront(edgeLabel);
+    }
+
+    // ===== NOVO: halo do primeiro nó ao aproximar para fechar =====
+    function ensureFirstNodeHalo(){
+      if(!firstNodeHalo && anchors.length){
+        firstNodeHalo = new fabric.Circle({
+          left: anchors[0].x, top: anchors[0].y,
+          originX:'center', originY:'center',
+          radius:10, fill:'rgba(16,185,129,0.10)', stroke:'#10B981', strokeWidth:2,
+          selectable:false, evented:false, visible:false
         });
-        canvas.add(edgeCursorDot);
+        canvas.add(firstNodeHalo);
       }
     }
-    function updateEdgeCursorDot(p){
-      if(edgeCursorDot){
-        edgeCursorDot.set({ left:p.x, top:p.y });
-        edgeCursorDot.setCoords();
-      }
-    }
-    function updatePreviewSegment(p){
-      if(!previewSegment) return;
-      const a=anchors[anchors.length-1];
-      previewSegment.set({ x1:a.x, y1:a.y, x2:p.x, y2:p.y });
-
-      const nearClose = anchors.length>=2 && dist(p, anchors[0])<=CLOSE_RADIUS;
-      previewSegment.set('stroke', nearClose ? '#10B981' : '#208BEC');
-      if(edgeCursorDot) edgeCursorDot.set('fill', nearClose ? '#10B981' : '#208BEC');
-
-      previewSegment.dirty=true; previewSegment.setCoords();
-      updateEdgeCursorDot(p);
-    }
-
-    function ensureCurvePreview(){ if(!curvePreview){ curvePreview = new fabric.Polyline([], { stroke:'#208BEC', strokeWidth:1, fill:'', selectable:false, evented:false }); canvas.add(curvePreview); } }
-    function updateCurvePreviewForCurrentDrag(){
-      if(anchors.length<2) return;
-      const a1 = anchors[anchors.length-1];
-      const a0 = anchors[anchors.length-2];
-      const c1 = a0.hOut ? a0.hOut : {x:a0.x,y:a0.y};
-      const c2 = a1.hIn ? a1.hIn : {x:a1.x,y:a1.y};
-      const L = dist(a0,a1) + dist(a0,c1)*0.5 + dist(a1,c2)*0.5;
-      const steps = Math.max(8, Math.min(64, Math.round(L/12)));
-      const pts=[];
-      for(let s=0;s<=steps;s++){
-        const t=s/steps;
-        pts.push(cubicPoint(a0,c1,c2,a1,t));
-      }
-      ensureCurvePreview();
-      curvePreview.set({points:pts}); curvePreview.dirty=true; curvePreview.setCoords();
-      canvas.requestRenderAll();
+    function updateFirstNodeHalo(p){
+      if(!anchors.length) return;
+      ensureFirstNodeHalo();
+      const near = anchors.length>=3 && dist(p, anchors[0]) <= CLOSE_RADIUS;
+      firstNodeHalo.set({ visible: near, left: anchors[0].x, top: anchors[0].y });
+      firstNodeHalo.setCoords();
+      if(near) canvas.bringToFront(firstNodeHalo);
     }
 
     function handleDrawingMouseDown(opt){
@@ -695,17 +767,24 @@
         ensurePreviewSegment(); updatePreviewSegment(p);
       }
       ensureCurrentMarker(); updateCurrentMarker(p);
+      ensureLiveFill(); updateLiveFill(p);
+      updateEdgeLabel(p);
+      updateFirstNodeHalo(p);
       canvas.requestRenderAll();
     }
 
     function handleDrawingMouseMove(opt){
       const raw = canvas.getPointer(opt.e);
+      const base = anchors.length ? anchors[anchors.length-1] : null;
+      const p = base ? snapPoint(base, raw) : raw;
+
       if(!isPlacing){
         ensureCurrentMarker(); updateCurrentMarker(raw);
-        if(anchors.length){ ensurePreviewSegment(); updatePreviewSegment(raw); }
+        if(anchors.length){ ensurePreviewSegment(); updatePreviewSegment(p); updateLiveFill(p); updateEdgeLabel(p); updateFirstNodeHalo(p); }
         canvas.requestRenderAll();
         return;
       }
+
       const last = anchors[anchors.length-1];
       const moved = Math.hypot(raw.x - dragStart.x, raw.y - dragStart.y);
       if(!placingDragged && moved>3){ placingDragged=true; }
@@ -720,18 +799,18 @@
         last.hIn  = { x: last.x - hx, y: last.y - hy };
         last.hOut = { x: last.x + hx, y: last.y + hy };
 
-        if(previewSegment){ canvas.remove(previewSegment); previewSegment=null; }
-        if(edgeCursorDot){ canvas.remove(edgeCursorDot); edgeCursorDot=null; }
-
+        // NÃO removemos mais o previewSegment/edgeCursorDot — mantemos a continuidade visual
         updateCurvePreviewForCurrentDrag();
         updateHandleGraphics();
       }else{
-        const base = anchors.length? anchors[anchors.length-1] : null;
-        const p = base ? snapPoint(base, raw) : raw;
         ensurePreviewSegment(); updatePreviewSegment(p);
       }
 
+      ensureLiveFill(); updateLiveFill(p);
       ensureCurrentMarker(); updateCurrentMarker(raw);
+      updateEdgeLabel(p);
+      updateFirstNodeHalo(p);
+
       canvas.requestRenderAll();
     }
 
@@ -744,7 +823,6 @@
       }
     }
 
-    // dblclick: fecha no desenho; abre edição no idle
     canvas.upperCanvasEl.addEventListener('dblclick', (e)=>{
       const target = canvas.findTarget(e, true);
       if(mode==='drawing'){ finishDrawing(); return; }
@@ -753,13 +831,11 @@
       }
     });
 
-    /* ========= UI flutuante ========= */
     const polyMenu = document.getElementById('polyMenu');
     const trashFab = document.getElementById('trashFab');
     const nameInput = document.getElementById('nameInput');
     function hideFloatingUI(){ polyMenu.style.display='none'; trashFab.style.display='none'; }
 
-    // Pop-up fixo à direita (verticalmente central)
     function positionPolyMenuFixedRight(){
       const shellW = shell.clientWidth;
       const shellH = shell.clientHeight;
@@ -772,22 +848,75 @@
       polyMenu.style.top  = top + 'px';
     }
 
+    // util
+    function getAbsolutePoints(poly){
+      const matrix = poly.calcTransformMatrix();
+      const offset = poly.pathOffset || {x:0,y:0};
+      return poly.points.map(pt=>{
+        const p = new fabric.Point(pt.x - offset.x, pt.y - offset.y);
+        const res = fabric.util.transformPoint(p, matrix);
+        return { x: res.x, y: res.y };
+      });
+    }
+
+    function getAbsPointsFromAny(obj){
+      if(obj && obj.zaptKind==='andarGroup'){
+        const base = getBasePoly(obj);
+        if(base) return getAbsolutePoints(base);
+      }
+      if(!obj) return [];
+      if(obj.type==='polygon') return getAbsolutePoints(obj);
+
+      if(obj.type==='rect'){
+        const coords = obj.getCoords();
+        return coords.map(p => ({ x:p.x, y:p.y }));
+      }
+
+      if(obj.type==='circle'){
+        const center = obj.getCenterPoint();
+        const rx = obj.radius * (obj.scaleX || 1);
+        const ry = obj.radius * (obj.scaleY || 1);
+        const phi = (obj.angle || 0) * Math.PI/180;
+        const steps = 48;
+        const pts=[];
+        for(let i=0;i<steps;i++){
+          const t = (i/steps) * Math.PI*2;
+          const x = rx*Math.cos(t), y = ry*Math.sin(t);
+          const xr = x*Math.cos(phi) - y*Math.sin(phi);
+          const yr = x*Math.sin(phi) + y*Math.cos(phi);
+          pts.push({ x: center.x + xr, y: center.y + yr });
+        }
+        return pts;
+      }
+
+      const bb = obj.getCoords ? obj.getCoords() : [];
+      if(bb.length) return bb.map(p=>({x:p.x,y:p.y}));
+      return [];
+    }
+
     function updateFloatingUI(){
       const obj = canvas.getActiveObject();
       if(!obj || !(obj.zaptKind==='polygon' || obj.zaptKind==='andarGroup')){ hideFloatingUI(); return; }
 
-      let stroke='#D1D1D1', fill='#EAEFF2', name=(obj.meta?.name)||'', sw=1;
+      let stroke='#D1D1D1', fill='#EAEFF2', name=(obj.meta?.name)||'', sw=0.5;
       let basePoly = getBasePoly(obj);
       if(basePoly){
         stroke = basePoly.stroke || stroke;
         fill = basePoly.fill || fill;
-        sw = basePoly.strokeWidth || 1;
+        sw = basePoly.strokeWidth ?? sw;
       }
-      document.getElementById('strokePicker').value = '#'+new fabric.Color(stroke).toHex();
-      document.getElementById('fillPicker').value = '#'+new fabric.Color(fill).toHex();
+      document.getElementById('strokePicker').value = '#'+new fabric.Color(stroke || '#000000').toHex();
+      document.getElementById('fillPicker').value = '#'+new fabric.Color(fill || '#FFFFFF').toHex();
       document.getElementById('strokeWidthInput').value = sw;
-      document.getElementById('typeSelect').value = (obj.meta?.type==='andar'?'andar':'poi');
+      document.getElementById('typeSelect').value = (obj.meta?.type) || 'loja';
       nameInput.value = name;
+
+      toggleControlsForType((obj.meta?.type)||'loja');
+
+      if((obj.meta?.type)==='contorno'){
+        document.getElementById('strokePicker').value = '#E0E0E0';
+        document.getElementById('fillPicker').value = '#FFFFFF';
+      }
 
       positionPolyMenuFixedRight();
 
@@ -804,9 +933,26 @@
     canvas.on('selection:cleared', hideFloatingUI);
     window.addEventListener('resize', ()=>{ if(polyMenu.style.display!=='none') positionPolyMenuFixedRight(); });
 
-    /* ========= Menu propriedades ========= */
+    function toggleControlsForType(type){
+      const strokePicker = document.getElementById('strokePicker');
+      const strokeWidthInput = document.getElementById('strokeWidthInput');
+      const fillPicker = document.getElementById('fillPicker');
+
+      const isAndar = (type === 'andar');
+      const isContorno = (type === 'contorno');
+
+      strokePicker.disabled = isAndar || isContorno;
+      strokeWidthInput.disabled = isAndar ? true : false;
+      fillPicker.disabled = isContorno;
+
+      strokePicker.style.opacity = (isAndar || isContorno) ? .5 : 1;
+      strokeWidthInput.style.opacity = isAndar ? .5 : 1;
+      fillPicker.style.opacity = isContorno ? .5 : 1;
+    }
+
     document.getElementById('strokePicker').addEventListener('input',(e)=>{
       const obj = canvas.getActiveObject(); if(!obj) return;
+      if((obj.meta?.type)==='contorno'){ e.target.value = '#E0E0E0'; return; }
       const val = e.target.value;
       const base = getBasePoly(obj); if(!base) return;
       base.set('stroke',val);
@@ -821,16 +967,124 @@
     });
     document.getElementById('fillPicker').addEventListener('input',(e)=>{
       const obj = canvas.getActiveObject(); if(!obj) return;
+      if((obj.meta?.type)==='contorno'){ e.target.value = '#FFFFFF'; return; }
       const val = e.target.value;
       const base = getBasePoly(obj); if(!base) return;
       base.set('fill',val);
       canvas.requestRenderAll(); addHistory(); refreshLayers();
     });
+
+    // ======== TIPOS / ESTILOS PADRÃO ========
+    const DEFAULTS = {
+      loja: {
+        stroke:'#D1D1D1', strokeWidth:0.5, fill:'#EAEFF2', opacity:0.95,
+        shadow:{ color:'rgba(0,0,0,0.25)', blur:12, offsetX:6, offsetY:6, nonScaling:true }
+      },
+      ancora: {
+        stroke:'#D1D1D1', strokeWidth:0.5, fill:'#CBECD8', opacity:0.95,
+        shadow:{ color:'rgba(0,0,0,0.25)', blur:12, offsetX:6, offsetY:6, nonScaling:true }
+      },
+      alimentacao: {
+        stroke:'#EFEFEF', strokeWidth:0.5, fill:'#F2D5AA', opacity:0.95,
+        shadow:{ color:'rgba(0,0,0,0.25)', blur:12, offsetX:6, offsetY:6, nonScaling:true }
+      },
+      andar: {
+        stroke:null, strokeWidth:0, fill:'#E6E0D5', opacity:0.98,
+        inner:{ color:'rgba(0,0,0,0.35)', blur:20, offsetX:6, offsetY:12, margin:80 }
+      },
+      contorno: {
+        stroke:'#E0E0E0', strokeWidth:1, fill:'#FFFFFF', opacity:1
+      }
+    };
+
+    function createPolygonFromPoints(absPoints, type='loja', nameOverride, anchorData){
+      const cfg = DEFAULTS[type] || DEFAULTS.loja;
+      const poly = new fabric.Polygon(absPoints, {
+        fill: cfg.fill, stroke: cfg.stroke || null, strokeWidth: cfg.strokeWidth || 0,
+        objectCaching: true, selectable: true, opacity: cfg.opacity ?? 1
+      });
+      const meta = { type, name: nameOverride || (
+        type==='andar' ? 'Andar abaixo' :
+        type==='ancora' ? 'Loja âncora' :
+        type==='alimentacao' ? 'Alimentação' :
+        type==='contorno' ? 'Contorno da planta' :
+        'Loja'
+      ) };
+      if(anchorData) meta.anchors = deepClone(anchorData);
+
+      poly.set({ zaptKind:'polygon', meta });
+
+      if(type==='andar'){
+        canvas.add(poly); poly.setCoords();
+        const grp = buildAndarGroupFromPolygon(poly, cfg, meta);
+        canvas.remove(poly); canvas.add(grp);
+        return grp;
+      } else {
+        if(cfg.shadow){ poly.set('shadow', new fabric.Shadow(cfg.shadow)); }
+        canvas.add(poly);
+        return poly;
+      }
+    }
+
+    function buildAndarGroupFromPolygon(poly, cfg, meta){
+      const center = poly.getCenterPoint();
+
+      const basePoly = fabric.util.object.clone(poly);
+      basePoly.set({ left:0, top:0, originX:'center', originY:'center', shadow:null, stroke:null, strokeWidth:0, fill: cfg.fill });
+      basePoly.meta = Object.assign({}, meta, { role:'base' });
+
+      const absPts = getAbsolutePoints(poly);
+      const localPts = absPts.map(p=>({ x: p.x - center.x, y: p.y - center.y }));
+
+      const rectBounds = poly.getBoundingRect(true, true);
+      const blur = cfg.inner.blur ?? 20;
+      const pad  = (cfg.inner.margin ?? blur*4);
+      const bigW = rectBounds.width  + pad*2;
+      const bigH = rectBounds.height + pad*2;
+
+      const overlayRect = new fabric.Rect({
+        left:0, top:0, originX:'center', originY:'center',
+        width: bigW, height: bigH,
+        fill: 'rgba(0,0,0,0.001)',
+        selectable:false, evented:false, objectCaching:true
+      });
+
+      overlayRect.set('shadow', new fabric.Shadow({
+        color: cfg.inner.color || 'rgba(0,0,0,0.35)',
+        blur: blur,
+        offsetX: cfg.inner.offsetX ?? 6,
+        offsetY: cfg.inner.offsetY ?? 12,
+        nonScaling: true
+      }));
+      overlayRect.padding = blur + 8;
+
+      const clipPoly = new fabric.Polygon(localPts, { left:0, top:0, originX:'center', originY:'center' });
+      overlayRect.clipPath = clipPoly;
+
+      const grp = new fabric.Group([basePoly, overlayRect], {
+        left:center.x, top:center.y, originX:'center', originY:'center', objectCaching:true
+      });
+      grp.set({ zaptKind:'andarGroup', meta:{ type:'andar', name: meta?.name || 'Andar abaixo', anchors: meta?.anchors? deepClone(meta.anchors): undefined } });
+      return grp;
+    }
+
+    function getBasePoly(obj){
+      if(!obj) return null;
+      if(obj.zaptKind==='polygon'){
+        return obj;
+      }
+      if(obj.zaptKind==='andarGroup' && obj._objects){
+        const found = obj._objects.find(o=> (o.type==='polygon') || (o.meta && o.meta.role==='base'));
+        return found || null;
+      }
+      return null;
+    }
+
     document.getElementById('typeSelect').addEventListener('change',(e)=>{
       const obj = canvas.getActiveObject(); if(!obj) return;
-      const val = e.target.value; // 'poi' | 'andar'
-      const base = getBasePoly(obj);
-      const ptsAbs = base ? getAbsolutePoints(base) : getAbsolutePoints(obj);
+      const val = e.target.value;
+
+      const ptsAbs = getAbsPointsFromAny(obj);
       const currentName = (obj.meta?.name) || 'Camada';
       const anchorData = obj.meta?.anchors ? deepClone(obj.meta.anchors) : undefined;
 
@@ -838,13 +1092,10 @@
       const newObj = createPolygonFromPoints(ptsAbs, val, currentName, anchorData);
       canvas.setActiveObject(newObj); canvas.requestRenderAll(); addHistory(); refreshLayers(); updateFloatingUI();
     });
+
     nameInput.addEventListener('input',(e)=>{ const obj=canvas.getActiveObject(); if(!obj) return; if(!obj.meta) obj.meta={}; obj.meta.name=e.target.value; refreshLayers(); });
     document.getElementById('trashFab').addEventListener('click', removeSelected);
-    document.getElementById('btnEditCurves').addEventListener('click', ()=>{
-      const obj=canvas.getActiveObject(); if(obj) enterEditMode(obj);
-    });
 
-    /* ========= Planta ========= */
     const toggleBg = document.getElementById('toggleBg');
     const bgInfo = document.getElementById('bgInfo');
     const bgFileNameEl = document.getElementById('bgFileName');
@@ -892,12 +1143,7 @@
       bgInfo.style.display='none'; bgFileNameEl.textContent='—'; canvas.requestRenderAll();
     });
 
-    /* ========= Botões / Atalhos ========= */
     document.getElementById('btnStartPoly').addEventListener('click', startDrawing);
-    document.getElementById('btnFinishPoly').addEventListener('click', ()=>{
-      if(mode==='drawing') finishDrawing();
-      if(mode==='editing') commitEdit();
-    });
     document.getElementById('btnUndo').addEventListener('click', ()=>{ undo(); });
     document.getElementById('btnRedo').addEventListener('click', redo);
 
@@ -908,6 +1154,8 @@
       if(e.key==='Delete'){ removeSelected(); }
       if(e.key==='Escape'){ if(mode==='drawing'){ cancelDrawing(); } else if(mode==='editing'){ cancelEdit(); } }
       if(e.key==='Enter'){ if(mode==='drawing'){ finishDrawing(); } else if(mode==='editing'){ commitEdit(); } }
+      // NOVO: Backspace desfaz último ponto durante o desenho
+      if(mode==='drawing' && e.key==='Backspace'){ e.preventDefault(); undoPoint(); }
     });
 
     function cancelDrawing(){
@@ -921,19 +1169,22 @@
         const mk = pointMarkers.pop(); if(mk) canvas.remove(mk);
         if(anchors.length===0){ cancelDrawing(); }
         else { updateCommittedSkeleton(); updateHandleGraphics(); }
+        // atualiza visual vivo também
+        if(liveFill){ liveFill.set({ points: buildPolygonPointsFromAnchors(false) }); liveFill.setCoords(); }
         canvas.requestRenderAll();
       }
     }
 
-    /* ========= Export ========= */
     function toggleDraftOverlays(visible){
       if(committedPath) committedPath.visible=visible;
+      if(liveFill) liveFill.visible=visible;
       if(previewSegment) previewSegment.visible=visible;
       if(curvePreview) curvePreview.visible=visible;
       if(edgeCursorDot) edgeCursorDot.visible=visible;
       pointMarkers.forEach(m=> m.visible=visible);
       handleLines.forEach(m=> m.visible=visible);
       handleDots.forEach(m=> m.visible=visible);
+      if(edgeLabel) edgeLabel.visible=visible;
       if(editOverlay.active){
         editOverlay.items.forEach(o=>o.visible=visible);
         if(editOverlay.preview) editOverlay.preview.visible=visible;
@@ -968,108 +1219,6 @@
       document.getElementById('logoImg').src=url;
     });
 
-    /* ========= Helpers de polígono / “andar” ========= */
-    function getAbsolutePoints(poly){
-      const matrix = poly.calcTransformMatrix();
-      const offset = poly.pathOffset || {x:0,y:0};
-      return poly.points.map(pt=>{
-        const p = new fabric.Point(pt.x - offset.x, pt.y - offset.y);
-        const res = fabric.util.transformPoint(p, matrix);
-        return { x: res.x, y: res.y };
-      });
-    }
-
-    const DEFAULTS = {
-      poi:   { stroke:'#D1D1D1', strokeWidth:1, fill:'#EAEFF2', opacity:0.95, shadow:{ color:'rgba(0,0,0,.10)', blur:8, offsetX:4, offsetY:4 } },
-      // INNER SHADOW para "andar" (sombra interna real)
-      andar: { stroke:'#1F2937', strokeWidth:1, fill:'#FFFFFF', opacity:0.98,
-               inner:{ color:'rgba(0,0,0,0.28)', blur:18, offsetX:0, offsetY:2, margin:72 } }
-    };
-
-    function createPolygonFromPoints(absPoints, type='poi', nameOverride, anchorData){
-      const cfg = DEFAULTS[type] || DEFAULTS.poi;
-      const poly = new fabric.Polygon(absPoints, {
-        fill: cfg.fill, stroke: cfg.stroke, strokeWidth: cfg.strokeWidth,
-        objectCaching: true, selectable: true, opacity: cfg.opacity
-      });
-      const meta = { type, name: nameOverride || (type==='poi'?'Ponto de interesse':'Andar abaixo') };
-      if(anchorData) meta.anchors = deepClone(anchorData);
-
-      poly.set({ zaptKind:'polygon', meta });
-
-      if(type==='andar'){
-        canvas.add(poly); poly.setCoords();
-        const grp = buildAndarGroupFromPolygon(poly, cfg.inner, meta);
-        canvas.remove(poly); canvas.add(grp);
-        return grp;
-      } else {
-        if(cfg.shadow){ poly.set('shadow', new fabric.Shadow(cfg.shadow)); }
-        canvas.add(poly);
-        return poly;
-      }
-    }
-
-    /* ====== INNER SHADOW ROBUSTO ======
-       - Retângulo grande com sombra, recortado (clip) pelo polígono.
-       - Mantém o preenchimento branco do piso e a sombra aplicada apenas no interior.
-    */
-    function buildAndarGroupFromPolygon(poly, innerCfg, meta){
-      const center = poly.getCenterPoint();
-
-      // base do andar (sem sombra)
-      const basePoly = fabric.util.object.clone(poly);
-      basePoly.set({ left:0, top:0, originX:'center', originY:'center', shadow:null });
-      basePoly.meta = Object.assign({}, meta, { role:'base' });
-
-      // pontos absolutos -> locais (centrados)
-      const absPts = getAbsolutePoints(poly);
-      const localPts = absPts.map(p=>({ x: p.x - center.x, y: p.y - center.y }));
-
-      // retângulo grande que recebe a sombra
-      const rectBounds = poly.getBoundingRect(true, true);
-      const blur = innerCfg.blur ?? 18;
-      const pad  = (innerCfg.margin ?? blur*4);
-      const bigW = rectBounds.width  + pad*2;
-      const bigH = rectBounds.height + pad*2;
-
-      const overlayRect = new fabric.Rect({
-        left:0, top:0, originX:'center', originY:'center',
-        width: bigW, height: bigH,
-        fill: 'rgba(0,0,0,0.001)',
-        selectable:false, evented:false, objectCaching:true
-      });
-
-      overlayRect.set('shadow', new fabric.Shadow({
-        color: innerCfg.color || 'rgba(0,0,0,0.28)',
-        blur: blur,
-        offsetX: innerCfg.offsetX ?? 0,
-        offsetY: innerCfg.offsetY ?? 2,
-        nonScaling: true
-      }));
-      overlayRect.padding = blur + 8;
-
-      // clip no polígono -> sombra apenas dentro
-      const clipPoly = new fabric.Polygon(localPts, { left:0, top:0, originX:'center', originY:'center' });
-      overlayRect.clipPath = clipPoly;
-
-      // grupo final
-      const grp = new fabric.Group([basePoly, overlayRect], {
-        left:center.x, top:center.y, originX:'center', originY:'center', objectCaching:true
-      });
-      grp.set({ zaptKind:'andarGroup', meta:{ type:'andar', name: meta?.name || 'Andar abaixo', anchors: meta?.anchors? deepClone(meta.anchors): undefined } });
-      return grp;
-    }
-
-    function getBasePoly(obj){
-      if(!obj) return null;
-      if(obj.zaptKind==='polygon') return obj;
-      if(obj.zaptKind==='andarGroup' && obj._objects){
-        const found = obj._objects.find(o=> (o.type==='polygon') || (o.meta && o.meta.role==='base'));
-        return found || null;
-      }
-      return null;
-    }
-
     document.getElementById('btnClear').addEventListener('click', ()=>{
       if(mode!=='idle') return;
       canvas.getObjects().slice().forEach(o=>{
@@ -1078,7 +1227,7 @@
       addHistory(); refreshLayers(); hideFloatingUI(); canvas.requestRenderAll();
     });
 
-    /* ========= Edição ========= */
+    // ======= EDIT MODE (dblclick) – fluxo original =======
     let editOverlay = { active:false, target:null, items:[], preview:null, anchorsBackup:null };
 
     function enterEditMode(target){
@@ -1098,6 +1247,7 @@
     }
 
     function anchorsFromPolygon(poly){
+      if(poly.type!=='polygon') return [];
       const abs = getAbsolutePoints(poly);
       const step = Math.max(1, Math.floor(abs.length/8));
       const res=[];
@@ -1110,7 +1260,7 @@
       updateCommittedSkeleton();
       createInteractiveEditHandles();
       const pts = buildPolygonPointsFromAnchors(true);
-      editOverlay.preview = new fabric.Polyline(pts, { stroke:'#208BEC', strokeWidth:1, fill:'', selectable:false, evented:false });
+      editOverlay.preview = new fabric.Polyline(pts, { stroke:'#208BEC', strokeWidth:1.2, fill:'', selectable:false, evented:false });
       canvas.add(editOverlay.preview);
       canvas.requestRenderAll();
     }
@@ -1176,7 +1326,7 @@
       if(!editOverlay.active) return;
       const target = editOverlay.target;
       const name = target.meta?.name;
-      const type = target.meta?.type || 'poi';
+      const type = target.meta?.type || 'loja';
       const pts = buildPolygonPointsFromAnchors(true);
 
       suppressHistory=true; canvas.remove(target); suppressHistory=false;
@@ -1203,5 +1353,7 @@
     addHistory();
     positionFloatbar();
   </script>
+
 </body>
 </html>
+
