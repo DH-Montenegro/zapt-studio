@@ -176,7 +176,6 @@
     .trash-fab{
       position:absolute; z-index:31; width:38px;height:38px;border-radius:50%;
       border:1px solid var(--border); background:#fff; display:none; place-items:center; box-shadow:var(--shadow-md);
-      transition:.15s;
     }
     .trash-fab:hover{background:#FFF5F5;border-color:#F9D3D3}
 
@@ -185,7 +184,20 @@
       padding:10px 12px; border-radius:12px; opacity:.95; font-size:13px; display:none; z-index:50; box-shadow:var(--shadow-md);
     }
 
-    .help-inline{font-size:12px; color:var(--muted-2)}
+    .help-inline{font-size:12px; color:#627c9e}
+
+    /* Catálogo de elementos */
+    .element-card{
+      border:1px solid var(--border); border-radius:12px; background:#fff;
+      padding:10px; display:flex; align-items:center; justify-content:center;
+      aspect-ratio:1; cursor:pointer; transition:.15s; position:relative;
+    }
+    .element-card:hover{ box-shadow: var(--shadow-sm); border-color:#D8E6F7; }
+    .element-card.selected{ outline:2px solid rgba(32,139,236,.30); border-color:#CFE6FF; }
+    .element-card .tag{
+      position:absolute; left:8px; bottom:8px; font-size:11px; color:#334155;
+      background:#F1F5FF; border:1px solid #E1E9FF; padding:2px 6px; border-radius:999px;
+    }
   </style>
 </head>
 <body>
@@ -200,20 +212,16 @@
       <div class="topbar-title">Zapt Map Studio</div>
       <div class="spacer"></div>
       <div class="topbar-actions">
-        <button id="btnExportPNG" class="btn-mini" title="Exportar PNG"><span class="material-symbols-outlined">image</span>Exportar PNG</button>
-        <button id="btnExportPDF" class="btn-mini" title="Exportar PDF"><span class="material-symbols-outlined">picture_as_pdf</span>Exportar PDF</button>
-        <button id="btnExportJSON" class="btn-mini" title="Exportar JSON"><span class="material-symbols-outlined">data_object</span>Exportar JSON</button>
+        <button id="btnExportPDF" class="btn-mini btn-primary" title="Exportar PDF">
+          <span class="material-symbols-outlined">picture_as_pdf</span>Exportar PDF
+        </button>
       </div>
     </div>
 
     <aside class="sidebar">
       <div class="section">
-        <h4>Planta (Imagem)</h4>
+        <h4>Planta (PDF)</h4>
         <div class="row space-between">
-          <div class="row">
-            <button id="btnAddPng" class="btn-mini"><span class="material-symbols-outlined">upload</span>Adicionar imagem (PNG)</button>
-            <input id="bgPngInput" type="file" accept="image/png" hidden/>
-          </div>
           <div class="row">
             <button id="btnAddPdf" class="btn-mini"><span class="material-symbols-outlined">picture_as_pdf</span>Carregar PDF</button>
             <input id="pdfInput" type="file" accept="application/pdf" hidden/>
@@ -245,7 +253,6 @@
       <div id="canvasShell" class="canvas-shell">
         <canvas id="c"></canvas>
 
-        <!-- ======= MENU DE PROPRIEDADES (ORDEM AJUSTADA) ======= -->
         <div id="polyMenu" class="poly-menu">
           <h5>Propriedades do item</h5>
           <div class="field"><label style="margin-right:8px">Nome do item</label><input id="nameInput" type="text" placeholder="Ex.: Loja 101"/></div>
@@ -257,12 +264,12 @@
               <option value="alimentacao">Alimentação</option>
               <option value="andar">Andar abaixo</option>
               <option value="contorno">Contorno da planta</option>
+              <option value="icone" disabled>Ícone</option>
             </select>
           </div>
           <div class="field"><label>Preenchimento</label><input id="fillPicker" type="color" value="#EAEFF2"/></div>
           <div class="field"><label>Borda</label><input id="strokePicker" type="color" value="#D1D1D1"/></div>
           <div class="field"><label>Espessura</label><input id="strokeWidthInput" type="number" min="0" step="0.5" value="0.5" style="width:80px"/></div>
-          <!-- Botão 'Editar curvas' removido conforme solicitado -->
         </div>
 
         <button id="trashFab" class="trash-fab" title="Excluir">
@@ -274,7 +281,6 @@
 
   <div id="floatbar" class="floatbar">
     <button id="btnStartPoly" class="fbtn" title="Desenhar polígono">
-      <!-- Ícone Fountain Pen -->
       <svg width="20" height="20" viewBox="0 0 298.727 298.727" aria-hidden="true" style="display:block">
         <path fill="currentColor" d="M286.069,12.66c-16.881-16.879-44.344-16.88-61.221,0C100.195,137.307,158.153,74.583,47.446,205.654L3.794,233.971
           c-2.372,1.538-3.801,4.176-3.794,7.004l0.117,49.306c0,0.003,0,0.007,0,0.009v0.014c0.014,4.606,3.761,8.296,8.305,8.305
@@ -312,9 +318,46 @@
       <span class="material-symbols-outlined">redo</span>
       Refazer
     </button>
+
+    <!-- Botão Elementos -->
+    <button id="btnElements" class="fbtn" title="Biblioteca de elementos (SVG)">
+      <span class="material-symbols-outlined">extension</span>
+      Elementos
+    </button>
   </div>
 
   <div id="toast" class="toast"></div>
+
+  <!-- Modal Elementos -->
+  <div id="elementsModal" style="
+    display:none; position:fixed; inset:0; z-index:60;
+    background:rgba(15,23,42,.35); backdrop-filter: blur(2px);
+    align-items:center; justify-content:center;">
+    <div style="
+      width:min(880px, 92vw); max-height:80vh; overflow:hidden;
+      background:#fff; border:1px solid var(--border); border-radius:16px;
+      box-shadow:var(--shadow-lg); display:flex; flex-direction:column;">
+      <div style="padding:12px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px">
+        <span class="material-symbols-outlined">extension</span>
+        <strong style="font-size:14px">Biblioteca de elementos (SVG)</strong>
+        <div class="spacer"></div>
+        <button id="btnCloseElements" class="btn-mini" title="Fechar">
+          <span class="material-symbols-outlined">close</span> Fechar
+        </button>
+      </div>
+      <div style="padding:12px; display:flex; gap:12px; align-items:center; border-bottom:1px solid var(--border)">
+        <div class="help-inline" style="flex:1">
+          Selecione um ícone e clique em <em>Adicionar</em>.
+        </div>
+      </div>
+      <div id="elementsGrid" style="padding:12px; overflow:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); gap:10px"></div>
+      <div style="padding:12px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end">
+        <button id="btnAddElement" class="btn-mini btn-primary" disabled>
+          <span class="material-symbols-outlined">add</span> Adicionar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     if (window.pdfjsLib) { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }
@@ -323,12 +366,16 @@
     const shell = document.getElementById('canvasShell');
     const floatbar = document.getElementById('floatbar');
 
+    let lockCanvasSize = false;
+
     function resizeCanvasToShell(){
-      const w = shell.clientWidth, h = shell.clientHeight;
-      if(w && h){
-        canvas.setWidth(w);
-        canvas.setHeight(h);
-        canvas.calcOffset();
+      if(!lockCanvasSize){
+        const w = shell.clientWidth, h = shell.clientHeight;
+        if(w && h){
+          canvas.setWidth(w);
+          canvas.setHeight(h);
+          canvas.calcOffset();
+        }
       }
       positionFloatbar();
       updateFloatingUI();
@@ -403,10 +450,15 @@
     }
     function loadFromHistory(i){
       if(i<0 || i>=history.stack.length) return;
-      const prevBg = bgImage || null; const wasVisible = prevBg ? prevBg.visible : (toggleBg ? toggleBg.checked : true);
+      const prevBgs = canvas.getObjects().filter(o => o.isBackground);
+      const wasVisible = prevBgs.some(bg => bg.visible);
       suppressHistory=true;
       canvas.loadFromJSON(history.stack[i], ()=>{
-        if(prevBg){ prevBg.excludeFromExport=true; canvas.add(prevBg); canvas.sendToBack(prevBg); prevBg.visible = wasVisible; bgImage = prevBg; }
+        let bg = prevBgs[0] || null;
+        if(bg){
+          canvas.getObjects().filter(o => o.isBackground && o !== bg).forEach(o => canvas.remove(o));
+          canvas.add(bg); canvas.sendToBack(bg); bg.visible = wasVisible;
+        }
         canvas.renderAll(); suppressHistory=false; refreshLayers(); updateFloatingUI();
       });
     }
@@ -416,6 +468,8 @@
     const UID_PREFIX='obj_'; let UID_SEQ=0;
     function genUid(){ return UID_PREFIX+(++UID_SEQ)+'_'+Date.now().toString(36); }
     function ensureUid(o){ if(!o.meta) o.meta={}; if(!o.meta.uid) o.meta.uid = genUid(); }
+    function forceNewUid(o){ if(!o.meta) o.meta = {}; o.meta.uid = genUid(); }
+
     function layerObjectsTopFirst(){
       const arr = canvas.getObjects().filter(o=> (o.zaptKind==='polygon' || o.zaptKind==='andarGroup'));
       return arr.reverse();
@@ -503,18 +557,17 @@
     let anchors=[];
     let drawing=false, isPlacing=false, placingDragged=false, dragStart=null;
 
-    // ===== NOVOS ITENS DE UX =====
-    let committedPath=null;      // traço sólido do caminho já colocado
-    let liveFill=null;           // preenchimento vivo do polígono em construção
-    let previewSegment=null;     // segmento do último ponto até o cursor
-    let curvePreview=null;       // prévia da curva (quando arrasta)
-    let edgeCursorDot=null;      // bolinha no cursor
+    let committedPath=null;
+    let liveFill=null;
+    let previewSegment=null;
+    let curvePreview=null;
+    let edgeCursorDot=null;
     let pointMarkers=[];
     let handleLines=[];
     let handleDots=[];
     let currentMarker=null;
-    let edgeLabel=null;          // label com comprimento/ângulo
-    let firstNodeHalo=null;      // halo do 1º ponto ao aproximar para fechar
+    let edgeLabel=null;
+    let firstNodeHalo=null;
 
     function clearPreviewGraphics(){
       if(committedPath){ canvas.remove(committedPath); committedPath=null; }
@@ -542,7 +595,7 @@
       const pts = buildPolygonPointsFromAnchors(true);
       const aCopy = deepClone(anchors);
       clearPreviewGraphics();
-      const obj = createPolygonFromPoints(pts, 'loja', undefined, aCopy); // padrão: loja
+      const obj = createPolygonFromPoints(pts, 'loja', undefined, aCopy);
       canvas.setActiveObject(obj); canvas.requestRenderAll();
       mode='idle'; drawing=false; anchors=[]; addHistory(); refreshLayers(); updateFloatingUI();
       canvas.selection=true; canvas.skipTargetFind=false; canvas.defaultCursor='default';
@@ -580,12 +633,11 @@
     }
     function updateCurrentMarker(p){ if(currentMarker){ currentMarker.set({ left:p.x, top:p.y }); currentMarker.setCoords(); } }
 
-    // ====== NOVO: caminho comprometido sem pontilhado ======
     function updateCommittedSkeleton(){
       const points = anchors.map(a=>({x:a.x,y:a.y}));
       if(!committedPath){
         committedPath = new fabric.Polyline(points, {
-          stroke:'#94A3B8', /* cor suave e sólida */
+          stroke:'#94A3B8',
           strokeWidth:1.2,
           fill:'', selectable:false, evented:false
         });
@@ -638,7 +690,6 @@
       return pts;
     }
 
-    // Dropdown de formas (inalterado)
     const btnShapes = document.getElementById('btnShapes');
     const dropdown = document.getElementById('shapesDropdown');
     btnShapes.addEventListener('click', () => {
@@ -651,7 +702,7 @@
         let obj;
         const size = 100;
         const common = {
-          fill: '#EAEFF2', // loja
+          fill: '#EAEFF2',
           stroke: '#D1D1D1',
           strokeWidth: 0.5,
           opacity: 0.95,
@@ -667,8 +718,7 @@
             height: size,
             ...common
           });
-        }
-        else if(shape === 'rect'){
+        } else if(shape === 'rect'){
           obj = new fabric.Rect({
             left: canvas.width/2 - size,
             top: canvas.height/2 - size/2,
@@ -676,8 +726,7 @@
             height: size,
             ...common
           });
-        }
-        else if(shape === 'circle'){
+        } else if(shape === 'circle'){
           obj = new fabric.Circle({
             left: canvas.width/2 - size/2,
             top: canvas.height/2 - size/2,
@@ -696,98 +745,6 @@
       });
     });
 
-    // ===== Pré-visualização de segmento (sólida) =====
-    function ensurePreviewSegment(){
-      if(!previewSegment && anchors.length){
-        const a=anchors[anchors.length-1];
-        previewSegment = new fabric.Line([a.x,a.y,a.x,a.y], {
-          stroke:'#2563EB',
-          strokeWidth:2,
-          selectable:false,
-          evented:false
-        });
-        canvas.add(previewSegment); canvas.bringToFront(previewSegment);
-      }
-      ensureEdgeCursorDot();
-    }
-    function ensureEdgeCursorDot(){
-      if(!edgeCursorDot){
-        edgeCursorDot = new fabric.Circle({
-          radius:4, fill:'#208BEC', stroke:'#ffffff', strokeWidth:1.5,
-          originX:'center', originY:'center', selectable:false, evented:false, opacity:0.9
-        });
-        canvas.add(edgeCursorDot);
-      }
-    }
-    function updateEdgeCursorDot(p){
-      if(edgeCursorDot){
-        edgeCursorDot.set({ left:p.x, top:p.y });
-        edgeCursorDot.setCoords();
-      }
-    }
-    function updatePreviewSegment(p){
-      if(!previewSegment) return;
-      const a=anchors[anchors.length-1];
-      previewSegment.set({ x1:a.x, y1:a.y, x2:p.x, y2:p.y });
-
-      const nearClose = anchors.length >= 3 && dist(p, anchors[0]) <= CLOSE_RADIUS;
-      previewSegment.set('stroke', nearClose ? '#10B981' : '#2563EB');
-      if(edgeCursorDot) edgeCursorDot.set('fill', nearClose ? '#10B981' : '#208BEC');
-
-      previewSegment.dirty=true; previewSegment.setCoords();
-      updateEdgeCursorDot(p);
-    }
-
-    // ===== Prévia da curva =====
-    function ensureCurvePreview(){ if(!curvePreview){ curvePreview = new fabric.Polyline([], { stroke:'#208BEC', strokeWidth:1.2, fill:'', selectable:false, evented:false }); canvas.add(curvePreview); } }
-    function updateCurvePreviewForCurrentDrag(){
-      if(anchors.length<2) return;
-      const a1 = anchors[anchors.length-1];
-      const a0 = anchors[anchors.length-2];
-      const c1 = a0.hOut ? a0.hOut : {x:a0.x,y:a0.y};
-      const c2 = a1.hIn ? a1.hIn : {x:a1.x,y:a1.y};
-      const L = dist(a0,a1) + dist(a0,c1)*0.5 + dist(a1,c2)*0.5;
-      const steps = Math.max(8, Math.min(64, Math.round(L/12)));
-      const pts=[];
-      for(let s=0;s<=steps;s++){
-        const t=s/steps;
-        pts.push(cubicPoint(a0,c1,c2,a1,t));
-      }
-      ensureCurvePreview();
-      curvePreview.set({points:pts}); curvePreview.dirty=true; curvePreview.setCoords();
-      canvas.requestRenderAll();
-    }
-
-    // ===== NOVO: preenchimento vivo do polígono =====
-    function ensureLiveFill(){
-      if(!liveFill){
-        liveFill = new fabric.Polygon([], {
-          fill:'rgba(32,139,236,0.08)',
-          stroke:'#208BEC',
-          strokeWidth:1,
-          selectable:false,
-          evented:false
-        });
-        canvas.add(liveFill);
-        // garantir que marcadores e label fiquem por cima
-        canvas.bringToFront(previewSegment || liveFill);
-      }
-    }
-    function updateLiveFill(pointer){
-      if(anchors.length<1) return;
-      ensureLiveFill();
-      // pontos já amostrados dos segmentos + ponteiro atual como última vértice
-      const basePts = buildPolygonPointsFromAnchors(false);
-      const pts = basePts.concat([{x:pointer.x, y:pointer.y}]);
-      liveFill.set({ points: pts });
-      liveFill.dirty=true; liveFill.setCoords();
-      // z-order: fill atrás do preview/label
-      if(previewSegment) canvas.bringToFront(previewSegment);
-      if(curvePreview) canvas.bringToFront(curvePreview);
-      if(edgeLabel) canvas.bringToFront(edgeLabel);
-    }
-
-    // ===== NOVO: label de comprimento/ângulo do segmento corrente =====
     function ensureEdgeLabel(){
       if(!edgeLabel){
         edgeLabel = new fabric.Text('', {
@@ -817,7 +774,6 @@
       canvas.bringToFront(edgeLabel);
     }
 
-    // ===== NOVO: halo do primeiro nó ao aproximar para fechar =====
     function ensureFirstNodeHalo(){
       if(!firstNodeHalo && anchors.length){
         firstNodeHalo = new fabric.Circle({
@@ -888,7 +844,6 @@
         last.hIn  = { x: last.x - hx, y: last.y - hy };
         last.hOut = { x: last.x + hx, y: last.y + hy };
 
-        // NÃO removemos mais o previewSegment/edgeCursorDot — mantemos a continuidade visual
         updateCurvePreviewForCurrentDrag();
         updateHandleGraphics();
       }else{
@@ -923,6 +878,7 @@
     const polyMenu = document.getElementById('polyMenu');
     const trashFab = document.getElementById('trashFab');
     const nameInput = document.getElementById('nameInput');
+
     function hideFloatingUI(){ polyMenu.style.display='none'; trashFab.style.display='none'; }
 
     function positionPolyMenuFixedRight(){
@@ -937,7 +893,6 @@
       polyMenu.style.top  = top + 'px';
     }
 
-    // util
     function getAbsolutePoints(poly){
       const matrix = poly.calcTransformMatrix();
       const offset = poly.pathOffset || {x:0,y:0};
@@ -988,23 +943,41 @@
       if(!obj || !(obj.zaptKind==='polygon' || obj.zaptKind==='andarGroup')){ hideFloatingUI(); return; }
 
       let stroke='#D1D1D1', fill='#EAEFF2', name=(obj.meta?.name)||'', sw=0.5;
-      let basePoly = getBasePoly(obj);
+      let type = (obj.meta?.type) || 'loja';
+      const basePoly = getBasePoly(obj) || obj;
       if(basePoly){
         stroke = basePoly.stroke || stroke;
-        fill = basePoly.fill || fill;
-        sw = basePoly.strokeWidth ?? sw;
+        fill   = basePoly.fill   || fill;
+        sw     = (typeof basePoly.strokeWidth === 'number') ? basePoly.strokeWidth : sw;
       }
-      document.getElementById('strokePicker').value = '#'+new fabric.Color(stroke || '#000000').toHex();
-      document.getElementById('fillPicker').value = '#'+new fabric.Color(fill || '#FFFFFF').toHex();
-      document.getElementById('strokeWidthInput').value = sw;
-      document.getElementById('typeSelect').value = (obj.meta?.type) || 'loja';
-      nameInput.value = name;
 
-      toggleControlsForType((obj.meta?.type)||'loja');
+      const strokePicker = document.getElementById('strokePicker');
+      const fillPicker   = document.getElementById('fillPicker');
+      const swInput      = document.getElementById('strokeWidthInput');
+      const typeSelect   = document.getElementById('typeSelect');
 
-      if((obj.meta?.type)==='contorno'){
-        document.getElementById('strokePicker').value = '#E0E0E0';
-        document.getElementById('fillPicker').value = '#FFFFFF';
+      nameInput.value      = name;
+      strokePicker.value   = '#'+new fabric.Color(stroke || '#000000').toHex();
+      fillPicker.value     = '#'+new fabric.Color(fill   || '#FFFFFF').toHex();
+      swInput.value        = sw;
+      typeSelect.value     = ['loja','ancora','alimentacao','andar','contorno','icone'].includes(type) ? type : 'loja';
+
+      const isAndar    = type==='andar';
+      const isContorno = type==='contorno';
+      const isIcon     = type==='icone';
+
+      typeSelect.disabled   = isIcon;
+      strokePicker.disabled = isAndar || isContorno || isIcon;
+      swInput.disabled      = isAndar || isIcon;
+      fillPicker.disabled   = isContorno || isIcon;
+
+      [strokePicker, swInput, fillPicker].forEach(el=>{
+        el.style.opacity = el.disabled ? .5 : 1;
+      });
+
+      if(isContorno){
+        strokePicker.value = '#E0E0E0';
+        fillPicker.value   = '#FFFFFF';
       }
 
       positionPolyMenuFixedRight();
@@ -1022,26 +995,11 @@
     canvas.on('selection:cleared', hideFloatingUI);
     window.addEventListener('resize', ()=>{ if(polyMenu.style.display!=='none') positionPolyMenuFixedRight(); });
 
-    function toggleControlsForType(type){
-      const strokePicker = document.getElementById('strokePicker');
-      const strokeWidthInput = document.getElementById('strokeWidthInput');
-      const fillPicker = document.getElementById('fillPicker');
-
-      const isAndar = (type === 'andar');
-      const isContorno = (type === 'contorno');
-
-      strokePicker.disabled = isAndar || isContorno;
-      strokeWidthInput.disabled = isAndar ? true : false;
-      fillPicker.disabled = isContorno;
-
-      strokePicker.style.opacity = (isAndar || isContorno) ? .5 : 1;
-      strokeWidthInput.style.opacity = isAndar ? .5 : 1;
-      fillPicker.style.opacity = isContorno ? .5 : 1;
-    }
+    function toggleControlsForType(type){ updateFloatingUI(); }
 
     document.getElementById('strokePicker').addEventListener('input',(e)=>{
       const obj = canvas.getActiveObject(); if(!obj) return;
-      if((obj.meta?.type)==='contorno'){ e.target.value = '#E0E0E0'; return; }
+      if((obj.meta?.type)==='contorno' || (obj.meta?.type)==='icone'){ updateFloatingUI(); return; }
       const val = e.target.value;
       const base = getBasePoly(obj); if(!base) return;
       base.set('stroke',val);
@@ -1049,6 +1007,7 @@
     });
     document.getElementById('strokeWidthInput').addEventListener('input',(e)=>{
       const obj = canvas.getActiveObject(); if(!obj) return;
+      if((obj.meta?.type)==='icone'){ updateFloatingUI(); return; }
       const val = parseFloat(e.target.value)||0;
       const base = getBasePoly(obj); if(!base) return;
       base.set('strokeWidth',val);
@@ -1056,14 +1015,13 @@
     });
     document.getElementById('fillPicker').addEventListener('input',(e)=>{
       const obj = canvas.getActiveObject(); if(!obj) return;
-      if((obj.meta?.type)==='contorno'){ e.target.value = '#FFFFFF'; return; }
+      if((obj.meta?.type)==='contorno' || (obj.meta?.type)==='icone'){ updateFloatingUI(); return; }
       const val = e.target.value;
       const base = getBasePoly(obj); if(!base) return;
       base.set('fill',val);
       canvas.requestRenderAll(); addHistory(); refreshLayers();
     });
 
-    // ======== TIPOS / ESTILOS PADRÃO ========
     const DEFAULTS = {
       loja: {
         stroke:'#D1D1D1', strokeWidth:0.5, fill:'#EAEFF2', opacity:0.95,
@@ -1086,12 +1044,26 @@
       }
     };
 
-    function createPolygonFromPoints(absPoints, type='loja', nameOverride, anchorData){
-      const cfg = DEFAULTS[type] || DEFAULTS.loja;
-      const poly = new fabric.Polygon(absPoints, {
+    // Normaliza pontos absolutos -> relativos e posiciona left/top no minX/minY
+    function polygonFromAbsolutePoints(absPoints, cfg, meta){
+      if(!absPoints || !absPoints.length) return null;
+      const minX = Math.min(...absPoints.map(p=>p.x));
+      const minY = Math.min(...absPoints.map(p=>p.y));
+      const rel  = absPoints.map(p=>({ x:p.x - minX, y:p.y - minY }));
+
+      const poly = new fabric.Polygon(rel, {
+        left: minX, top: minY,
+        originX:'left', originY:'top',
         fill: cfg.fill, stroke: cfg.stroke || null, strokeWidth: cfg.strokeWidth || 0,
         objectCaching: true, selectable: true, opacity: cfg.opacity ?? 1
       });
+      poly.set({ zaptKind:'polygon', meta });
+      if(cfg.shadow){ poly.set('shadow', new fabric.Shadow(cfg.shadow)); }
+      return poly;
+    }
+
+    function createPolygonFromPoints(absPoints, type='loja', nameOverride, anchorData){
+      const cfg = DEFAULTS[type] || DEFAULTS.loja;
       const meta = { type, name: nameOverride || (
         type==='andar' ? 'Andar abaixo' :
         type==='ancora' ? 'Loja âncora' :
@@ -1101,16 +1073,17 @@
       ) };
       if(anchorData) meta.anchors = deepClone(anchorData);
 
-      poly.set({ zaptKind:'polygon', meta });
-
       if(type==='andar'){
-        canvas.add(poly); poly.setCoords();
-        const grp = buildAndarGroupFromPolygon(poly, cfg, meta);
-        canvas.remove(poly); canvas.add(grp);
+        // Cria um poly base normalizado, depois gera o grupo
+        const basePoly = polygonFromAbsolutePoints(absPoints, { fill: cfg.fill }, Object.assign({}, meta, { role:'base' }));
+        if(!basePoly) return null;
+        canvas.add(basePoly); basePoly.setCoords();
+        const grp = buildAndarGroupFromPolygon(basePoly, cfg, meta);
+        canvas.remove(basePoly); canvas.add(grp);
         return grp;
       } else {
-        if(cfg.shadow){ poly.set('shadow', new fabric.Shadow(cfg.shadow)); }
-        canvas.add(poly);
+        const poly = polygonFromAbsolutePoints(absPoints, cfg, meta);
+        if(poly){ canvas.add(poly); }
         return poly;
       }
     }
@@ -1159,9 +1132,7 @@
 
     function getBasePoly(obj){
       if(!obj) return null;
-      if(obj.zaptKind==='polygon'){
-        return obj;
-      }
+      if(obj.zaptKind==='polygon'){ return obj; }
       if(obj.zaptKind==='andarGroup' && obj._objects){
         const found = obj._objects.find(o=> (o.type==='polygon') || (o.meta && o.meta.role==='base'));
         return found || null;
@@ -1169,43 +1140,100 @@
       return null;
     }
 
+    // ===== Troca de categoria (NÃO recria p/ tipos simples) =====
+    function applyPresetInPlace(target, newType){
+      const cfg = DEFAULTS[newType] || DEFAULTS.loja;
+      const base = getBasePoly(target) || target;
+      if(!base) return;
+
+      base.set({
+        fill: cfg.fill,
+        stroke: cfg.stroke || null,
+        strokeWidth: (typeof cfg.strokeWidth === 'number') ? cfg.strokeWidth : 0,
+        opacity: (typeof cfg.opacity === 'number') ? cfg.opacity : 1
+      });
+      if(cfg.shadow){
+        base.set('shadow', new fabric.Shadow(cfg.shadow));
+      }else{
+        base.set('shadow', undefined);
+      }
+      if(!target.meta) target.meta = {};
+      target.meta.type = newType;
+
+      canvas.requestRenderAll(); addHistory(); refreshLayers(); updateFloatingUI();
+    }
+
+    function replacePreservingIndex(oldObj, makeNewObj){
+      const objs = canvas.getObjects();
+      const originalIndex = objs.indexOf(oldObj);
+      const activeName = oldObj.meta?.name || 'Camada';
+      const anchorData  = oldObj.meta?.anchors ? deepClone(oldObj.meta.anchors) : undefined;
+      const ptsAbs = getAbsPointsFromAny(oldObj);
+
+      suppressHistory = true; canvas.remove(oldObj); suppressHistory = false;
+
+      const newObj = makeNewObj(ptsAbs, activeName, anchorData);
+      if(newObj && originalIndex >= 0) canvas.moveTo(newObj, originalIndex);
+      canvas.setActiveObject(newObj);
+      canvas.requestRenderAll(); addHistory(); refreshLayers(); updateFloatingUI();
+      return newObj;
+    }
+
     document.getElementById('typeSelect').addEventListener('change',(e)=>{
       const obj = canvas.getActiveObject(); if(!obj) return;
-      const val = e.target.value;
 
-      const ptsAbs = getAbsPointsFromAny(obj);
-      const currentName = (obj.meta?.name) || 'Camada';
-      const anchorData = obj.meta?.anchors ? deepClone(obj.meta.anchors) : undefined;
+      if((obj.meta?.type)==='icone'){
+        e.target.value = 'icone';
+        toast('Ícone é somente leitura.');
+        return;
+      }
 
-      suppressHistory=true; canvas.remove(obj); suppressHistory=false;
-      const newObj = createPolygonFromPoints(ptsAbs, val, currentName, anchorData);
-      canvas.setActiveObject(newObj); canvas.requestRenderAll(); addHistory(); refreshLayers(); updateFloatingUI();
+      const newType = e.target.value;
+
+      // Caso 1: simples (polígono normal) -> aplica preset no próprio objeto
+      if(obj.zaptKind !== 'andarGroup' && newType !== 'andar'){
+        applyPresetInPlace(obj, newType);
+        return;
+      }
+
+      // Caso 2: virar "andar"
+      if(obj.zaptKind !== 'andarGroup' && newType === 'andar'){
+        replacePreservingIndex(obj, (ptsAbs, name, anchors)=>{
+          return createPolygonFromPoints(ptsAbs, 'andar', name, anchors);
+        });
+        return;
+      }
+
+      // Caso 3: sair de "andar" para outro tipo
+      if(obj.zaptKind === 'andarGroup' && newType !== 'andar'){
+        replacePreservingIndex(obj, (ptsAbs, name, anchors)=>{
+          return createPolygonFromPoints(ptsAbs, newType, name, anchors);
+        });
+        return;
+      }
+
+      // Caso 4: já é "andar" e permaneceu "andar": nada a fazer
+      updateFloatingUI();
     });
 
-    nameInput.addEventListener('input',(e)=>{ const obj=canvas.getActiveObject(); if(!obj) return; if(!obj.meta) obj.meta={}; obj.meta.name=e.target.value; refreshLayers(); });
+    nameInput.addEventListener('input',(e)=>{
+      const obj=canvas.getActiveObject(); if(!obj) return;
+      if(!obj.meta) obj.meta={};
+      obj.meta.name=e.target.value; refreshLayers();
+    });
     document.getElementById('trashFab').addEventListener('click', removeSelected);
 
     const toggleBg = document.getElementById('toggleBg');
     const bgInfo = document.getElementById('bgInfo');
     const bgFileNameEl = document.getElementById('bgFileName');
     let bgImage=null, bgFileName='';
-    toggleBg.addEventListener('change', ()=>{ if(bgImage){ bgImage.visible = toggleBg.checked; canvas.requestRenderAll(); } });
-
-    document.getElementById('btnAddPng').addEventListener('click', ()=> document.getElementById('bgPngInput').click());
-    document.getElementById('bgPngInput').addEventListener('change',(ev)=>{
-      const file = ev.target.files[0]; if(!file) return; const url = URL.createObjectURL(file);
-      bgFileName = file.name; bgFileNameEl.textContent = bgFileName; bgInfo.style.display='flex';
-      fabric.Image.fromURL(url,(img)=>{
-        img.set({ selectable:false, evented:false });
-        const scale = Math.min(canvas.width/img.width, canvas.height/img.height);
-        img.scale(scale);
-        img.set({ left:(canvas.width - img.getScaledWidth())/2, top:(canvas.height - img.getScaledHeight())/2 });
-        if(bgImage) canvas.remove(bgImage);
-        bgImage = img; bgImage.excludeFromExport=true;
-        canvas.add(bgImage); canvas.sendToBack(bgImage); refreshLayers();
-      },{crossOrigin:'anonymous'});
+    toggleBg.addEventListener('change', ()=>{
+      const show = toggleBg.checked;
+      canvas.getObjects().forEach(o => { if(o.isBackground) o.visible = show; });
+      canvas.requestRenderAll();
     });
 
+    // ====== IMPORTAR PDF ======
     document.getElementById('btnAddPdf').addEventListener('click',()=>{ if(!window.pdfjsLib){ toast('Visualização de PDF indisponível.'); return; } document.getElementById('pdfInput').click(); });
     document.getElementById('pdfInput').addEventListener('change', async (ev)=>{
       if(!window.pdfjsLib){ toast('pdf.js não carregado.'); return; }
@@ -1215,20 +1243,41 @@
       const cvs = document.createElement('canvas'); cvs.width=viewport.width; cvs.height=viewport.height; const ctx=cvs.getContext('2d');
       await page.render({ canvasContext:ctx, viewport }).promise;
       const dataURL = cvs.toDataURL('image/png');
+
       bgFileName = file.name; bgFileNameEl.textContent = bgFileName; bgInfo.style.display='flex';
+
       fabric.Image.fromURL(dataURL,(img)=>{
-        img.set({ selectable:false, evented:false });
-        const scale = Math.min(canvas.width/img.width, canvas.height/img.height);
-        img.scale(scale);
-        img.set({ left:(canvas.width - img.getScaledWidth())/2, top:(canvas.height - img.getScaledHeight())/2 });
+        img.set({
+          selectable:false, evented:false,
+          excludeFromExport:true,
+          isBackground:true,
+          hasBorders:false, hasControls:false
+        });
+
+        img.scale(1);
+        img.set({ left:0, top:0 });
+
+        canvas.getObjects().filter(o => o.isBackground && o !== img).forEach(o => canvas.remove(o));
+
+        lockCanvasSize = true;
+        canvas.setWidth(img.width);
+        canvas.setHeight(img.height);
+        canvas.calcOffset();
+
         if(bgImage) canvas.remove(bgImage);
-        bgImage = img; bgImage.excludeFromExport=true;
-        canvas.add(bgImage); canvas.sendToBack(bgImage); toggleBg.checked=true; bgImage.visible=true; refreshLayers();
+        bgImage = img;
+        canvas.add(bgImage); canvas.sendToBack(bgImage);
+        toggleBg.checked=true; bgImage.visible=true; refreshLayers();
+
+        positionFloatbar();
+        updateFloatingUI();
+        canvas.requestRenderAll();
       });
     });
 
     document.getElementById('btnRemoveBg').addEventListener('click', ()=>{
-      if(bgImage){ canvas.remove(bgImage); bgImage=null; }
+      canvas.getObjects().filter(o => o.isBackground).forEach(o => canvas.remove(o));
+      bgImage=null;
       bgInfo.style.display='none'; bgFileNameEl.textContent='—'; canvas.requestRenderAll();
     });
 
@@ -1243,7 +1292,6 @@
       if(e.key==='Delete'){ removeSelected(); }
       if(e.key==='Escape'){ if(mode==='drawing'){ cancelDrawing(); } else if(mode==='editing'){ cancelEdit(); } }
       if(e.key==='Enter'){ if(mode==='drawing'){ finishDrawing(); } else if(mode==='editing'){ commitEdit(); } }
-      // NOVO: Backspace desfaz último ponto durante o desenho
       if(mode==='drawing' && e.key==='Backspace'){ e.preventDefault(); undoPoint(); }
     });
 
@@ -1258,7 +1306,6 @@
         const mk = pointMarkers.pop(); if(mk) canvas.remove(mk);
         if(anchors.length===0){ cancelDrawing(); }
         else { updateCommittedSkeleton(); updateHandleGraphics(); }
-        // atualiza visual vivo também
         if(liveFill){ liveFill.set({ points: buildPolygonPointsFromAnchors(false) }); liveFill.setCoords(); }
         canvas.requestRenderAll();
       }
@@ -1279,28 +1326,17 @@
         if(editOverlay.preview) editOverlay.preview.visible=visible;
       }
     }
-    document.getElementById('btnExportPNG').addEventListener('click', ()=>{
-      const wasMode=mode; toggleDraftOverlays(false);
-      const dataURL = canvas.toDataURL({ format:'png', multiplier:2 });
-      const a=document.createElement('a'); a.href=dataURL; a.download='mapa.png'; a.click();
-      toggleDraftOverlays(true); if(wasMode) canvas.requestRenderAll(); toast('PNG exportado!');
-    });
+
     document.getElementById('btnExportPDF').addEventListener('click', ()=>{
       const { jsPDF } = window.jspdf || {}; if(!jsPDF){ toast('Biblioteca PDF indisponível.'); return; }
       const wasMode=mode; toggleDraftOverlays(false);
-      const imgData = canvas.toDataURL({ format:'png', multiplier:2 });
-      const w=canvas.getWidth(), h=canvas.getHeight(); const orientation = w>h?'l':'p';
-      const pdf = new jsPDF({ orientation, unit:'pt', format:'a4' });
-      const pageW=pdf.internal.pageSize.getWidth(), pageH=pdf.internal.pageSize.getHeight();
-      const scale=Math.min(pageW/w,pageH/h); const imgW=w*scale, imgH=h*scale; const x=(pageW-imgW)/2, y=(pageH-imgH)/2;
-      pdf.addImage(imgData,'PNG',x,y,imgW,imgH,undefined,'FAST'); pdf.save('mapa.pdf');
+      const imgData = canvas.toDataURL({ format:'png', multiplier:1 });
+      const w = canvas.getWidth();
+      const h = canvas.getHeight();
+      const pdf = new jsPDF({ orientation: (w>h?'l':'p'), unit:'pt', format:[w, h] });
+      pdf.addImage(imgData,'PNG',0,0,w,h,undefined,'FAST');
+      pdf.save('mapa.pdf');
       toggleDraftOverlays(true); if(wasMode) canvas.requestRenderAll(); toast('PDF exportado!');
-    });
-    document.getElementById('btnExportJSON').addEventListener('click', ()=>{
-      const json = canvas.toDatalessJSON(['meta','zaptKind']);
-      const blob = new Blob([JSON.stringify(json,null,2)], {type:'application/json'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='projeto-poligonos.json'; a.click(); URL.revokeObjectURL(a.href);
-      toast('JSON exportado!');
     });
 
     document.getElementById('logoInput').addEventListener('change',(ev)=>{
@@ -1311,12 +1347,11 @@
     document.getElementById('btnClear').addEventListener('click', ()=>{
       if(mode!=='idle') return;
       canvas.getObjects().slice().forEach(o=>{
-        if(o!==bgImage) canvas.remove(o);
+        if(!o.isBackground) canvas.remove(o);
       });
       addHistory(); refreshLayers(); hideFloatingUI(); canvas.requestRenderAll();
     });
 
-    // ======= EDIT MODE (dblclick) – fluxo original =======
     let editOverlay = { active:false, target:null, items:[], preview:null, anchorsBackup:null };
 
     function enterEditMode(target){
@@ -1418,8 +1453,13 @@
       const type = target.meta?.type || 'loja';
       const pts = buildPolygonPointsFromAnchors(true);
 
+      const objs = canvas.getObjects();
+      const originalIndex = objs.indexOf(target);
+
       suppressHistory=true; canvas.remove(target); suppressHistory=false;
       const newObj = createPolygonFromPoints(pts, type, name, deepClone(anchors));
+      if(newObj && originalIndex >= 0) canvas.moveTo(newObj, originalIndex);
+
       canvas.setActiveObject(newObj);
       exitEditMode();
       addHistory(); refreshLayers(); updateFloatingUI();
@@ -1439,9 +1479,214 @@
       canvas.requestRenderAll();
     }
 
+    function ensurePreviewSegment(){
+      if(!previewSegment){
+        previewSegment = new fabric.Line([0,0,0,0], { stroke:'#208BEC', strokeWidth:1, selectable:false, evented:false });
+        canvas.add(previewSegment);
+      }
+    }
+    function updatePreviewSegment(p){
+      if(anchors.length){
+        const a = anchors[anchors.length-1];
+        previewSegment.set({ x1:a.x, y1:a.y, x2:p.x, y2:p.y });
+        previewSegment.setCoords();
+      }
+    }
+    function ensureLiveFill(){
+      if(!liveFill){
+        liveFill = new fabric.Polygon([], { fill:'rgba(32,139,236,0.08)', stroke:'', selectable:false, evented:false });
+        canvas.add(liveFill);
+      }
+    }
+    function updateLiveFill(p){
+      const pts = buildPolygonPointsFromAnchors(false);
+      if(anchors.length) pts.push({x:p.x,y:p.y});
+      liveFill.set({ points: pts }); liveFill.setCoords();
+    }
+    function updateCurvePreviewForCurrentDrag(){
+      const pts = buildPolygonPointsFromAnchors(false);
+      if(curvePreview){ canvas.remove(curvePreview); curvePreview=null; }
+      if(pts.length>=2){
+        curvePreview = new fabric.Polyline(pts, { stroke:'#208BEC', strokeWidth:1, fill:'', selectable:false, evented:false });
+        canvas.add(curvePreview);
+      }
+    }
+
     addHistory();
     positionFloatbar();
-  </script>
 
+    // ==== Copiar/Colar (preserva meta/zaptKind e posiciona ao lado do original) ====
+    let copiedObject = null;
+    let copySource = null;
+    let copySourceIndex = null;
+    const EXTRA_PROPS = ['meta','zaptKind'];
+
+    document.addEventListener('keydown', function(e) {
+      const tag = (document.activeElement && document.activeElement.tagName) || '';
+      const typing = tag === 'INPUT' || tag === 'TEXTAREA';
+
+      // Ctrl/Cmd + C
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c' && !typing) {
+        const active = canvas.getActiveObject();
+        if (active) {
+          copySource = active;
+
+          const objs = canvas.getObjects();
+          if (active.type === 'activeSelection') {
+            const idxs = active._objects.map(o => objs.indexOf(o)).filter(i => i>=0);
+            copySourceIndex = idxs.length ? Math.max(...idxs) : null;
+          } else {
+            copySourceIndex = objs.indexOf(active);
+          }
+
+          active.clone(function(cloned) {
+            copiedObject = cloned;
+            toast('Copiado');
+          }, EXTRA_PROPS);
+        }
+        e.preventDefault();
+      }
+
+      // Ctrl/Cmd + V
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v' && !typing) {
+        if (copiedObject) {
+          copiedObject.clone(function(clonedObj) {
+            canvas.discardActiveObject();
+
+            const placeAtIndex = (obj, refIndex) => {
+              canvas.add(obj);
+              if (typeof refIndex === 'number') {
+                canvas.moveTo(obj, refIndex + 1); // logo acima do original
+              }
+            };
+
+            if (clonedObj.type === 'activeSelection') {
+              clonedObj.canvas = canvas;
+              const members = [];
+              clonedObj.forEachObject(function(obj) {
+                if(!obj.meta) obj.meta = {};
+                if(!obj.zaptKind) obj.zaptKind = 'polygon';
+                forceNewUid(obj);
+                obj.left += 20; obj.top  += 20;
+                placeAtIndex(obj, copySourceIndex);
+                members.push(obj);
+              });
+              const sel = new fabric.ActiveSelection(members, { canvas });
+              canvas.setActiveObject(sel);
+            } else {
+              if(!clonedObj.meta) clonedObj.meta = {};
+              if(!clonedObj.zaptKind) clonedObj.zaptKind = 'polygon';
+              forceNewUid(clonedObj);
+
+              const base = copySource && copySource.left!=null ? copySource : { left: canvas.getWidth()/2, top: canvas.getHeight()/2 };
+              clonedObj.set({ left: base.left + 20, top: base.top + 20 });
+
+              placeAtIndex(clonedObj, copySourceIndex);
+              canvas.setActiveObject(clonedObj);
+            }
+
+            addHistory();
+            refreshLayers();
+            updateFloatingUI();
+            canvas.requestRenderAll();
+          }, EXTRA_PROPS);
+        }
+        e.preventDefault();
+      }
+    });
+
+    // ====== ELEMENTOS (SVG) ======
+    const ELEMENTS_MANIFEST = [
+      { name:'Escada Rolante', src:'./svgs/escadarolante.svg' },
+      { name:'Mesa e cadeira',       src:'./svgs/mesaecadeira.svg' },
+      { name:'Escada',         src:'./svgs/escada.svg' },
+      { name:'Elevador',          src:'./svgs/elevador.svg' }
+    ];
+    let elementsCatalog = [...ELEMENTS_MANIFEST];
+    let selectedElement = null;
+
+    function openElementsModal(){
+      renderElementsGrid();
+      document.getElementById('btnAddElement').disabled = true;
+      document.getElementById('elementsModal').style.display = 'flex';
+    }
+    function closeElementsModal(){
+      document.getElementById('elementsModal').style.display = 'none';
+      selectedElement = null;
+    }
+
+    function renderElementsGrid(){
+      const grid = document.getElementById('elementsGrid');
+      grid.innerHTML = '';
+      elementsCatalog.forEach((item)=>{
+        const card = document.createElement('div');
+        card.className = 'element-card';
+        card.title = item.name || 'Elemento';
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.alt = item.name || 'svg';
+        img.style.maxWidth = '80%';
+        img.style.maxHeight = '80%';
+        img.loading='lazy';
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.textContent = item.name || 'Elemento';
+        card.appendChild(img);
+        card.appendChild(tag);
+        card.addEventListener('click', ()=>{
+          grid.querySelectorAll('.element-card').forEach(el=> el.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedElement = item;
+          document.getElementById('btnAddElement').disabled = false;
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function addSvgElementToCanvas(item){
+      if(!item) return;
+      fabric.loadSVGFromURL(item.src, (objects, options) => {
+        let svgObj = fabric.util.groupSVGElements(objects, options);
+
+        const targetSize = 72;
+        const bounds = svgObj.getBoundingRect(true, true);
+        if(bounds.width > 0){
+          const scale = targetSize / bounds.width;
+          svgObj.set({ scaleX: scale, scaleY: scale });
+        }
+
+        svgObj.set({
+          left: canvas.getWidth()/2,
+          top:  canvas.getHeight()/2,
+          originX: 'center',
+          originY: 'center'
+        });
+
+        svgObj.set({
+          zaptKind: 'polygon',
+          meta: { type: 'icone', name: item.name || 'Ícone' },
+          selectable: true,
+          opacity: 1,
+          shadow: new fabric.Shadow({ color:'rgba(0,0,0,0.25)', blur:12, offsetX:6, offsetY:6, nonScaling:true })
+        });
+
+        canvas.add(svgObj);
+        canvas.setActiveObject(svgObj);
+        addHistory();
+        refreshLayers();
+        updateFloatingUI();
+        canvas.requestRenderAll();
+      }, (err)=>{ console.warn('Falha ao carregar SVG:', err); });
+    }
+
+    document.getElementById('btnElements').addEventListener('click', openElementsModal);
+    document.getElementById('btnCloseElements').addEventListener('click', closeElementsModal);
+    document.getElementById('elementsModal').addEventListener('click', (e)=>{
+      if(e.target.id === 'elementsModal'){ closeElementsModal(); } // clique no backdrop
+    });
+    document.getElementById('btnAddElement').addEventListener('click', ()=>{
+      if(selectedElement){ addSvgElementToCanvas(selectedElement); closeElementsModal(); }
+    });
+  </script>
 </body>
 </html>
